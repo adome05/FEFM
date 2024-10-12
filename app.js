@@ -8,6 +8,49 @@ const firebaseConfig = {
     messagingSenderId: "731902423927",
     appId: "1:731902423927:web:bea2461acafebc1a24e772"
 };
+// دالة لتحديث نتائج المباراة
+function updateMatchResult(matchId, result) {
+    db.collection("matches").doc(matchId).update({
+        result: result
+    })
+    .then(() => {
+        console.log("تم تحديث نتيجة المباراة بنجاح");
+        alert("تم تحديث نتيجة المباراة بنجاح!");
+    })
+    .catch((error) => {
+        console.error("خطأ في تحديث نتيجة المباراة: ", error);
+        alert("حدث خطأ أثناء تحديث نتيجة المباراة.");
+    });
+}
+
+// التعامل مع تقديم النموذج
+document.getElementById("results-form").addEventListener("submit", function(event) {
+    event.preventDefault(); // منع إعادة تحميل الصفحة
+    const matchId = document.getElementById("matchId").value;
+    const result = document.getElementById("result").value;
+    updateMatchResult(matchId, result);
+});
+// دالة لعرض ترتيب الفرق
+function displayStandings() {
+    const standingsBody = document.getElementById("standings-body");
+    standingsBody.innerHTML = ""; // تفريغ المحتوى السابق
+
+    db.collection("teams").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const teamData = doc.data();
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${teamData.name}</td><td>${teamData.points}</td>`;
+            standingsBody.appendChild(row);
+        });
+    }).catch((error) => {
+        console.error("خطأ في جلب ترتيب الفرق: ", error);
+    });
+}
+
+// استدعاء الدالة لعرض الترتيب عند تحميل الصفحة
+document.addEventListener("DOMContentLoaded", function() {
+    displayStandings();
+});
 
 // تهيئة Firebase
 const app = firebase.initializeApp(firebaseConfig);
